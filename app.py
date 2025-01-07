@@ -5,7 +5,7 @@ from PIL import Image
 import os
 
 # Path ke model
-MODEL_PATH = 'JAGUNG/Dataset/model_jagung.h5'
+MODEL_PATH = os.path.join(os.getcwd(), 'Dataset', 'model_jagung.h5')
 
 # Cek apakah model tersedia
 if not os.path.exists(MODEL_PATH):
@@ -31,7 +31,7 @@ def predict_image(img_array):
 
 # Fungsi halaman Home
 def home_page():
-    st.title("Selamat Datang di Aplikasi Deteksi Penyakit Daun Jagung ")
+    st.title("Selamat Datang di Aplikasi Deteksi Penyakit Daun Jagung")
     st.write("""
     Aplikasi ini digunakan untuk mendeteksi penyakit pada daun jagung menggunakan gambar yang diambil melalui kamera.
     
@@ -46,11 +46,18 @@ def home_page():
     - Gray Leaf Spot (Penyakit bercak daun abu-abu)
     - Blight (Hawar daun)
     """)
+    # Path gambar ilustrasi
+    sample_image_path = os.path.join(os.getcwd(), 'Dataset', 'sample_imagee.jpg')
 
+    # Cek apakah gambar tersedia
+    if not os.path.exists(sample_image_path):
+        st.error(f"Gambar tidak ditemukan: {sample_image_path}")
+    else:
+        st.image(sample_image_path, caption="Ilustrasi Tanaman Jagung", use_container_width=True)
 
 # Fungsi halaman Kamera
 def camera_page():
-    st.title("Deteksi Penyakit Daun Jagung Melalui Kamera ")
+    st.title("Deteksi Penyakit Daun Jagung Melalui Kamera")
 
     # Input kamera
     camera_input = st.camera_input("Silakan ambil gambar daun jagung menggunakan kamera di bawah ini:")
@@ -90,6 +97,14 @@ def about_page():
     sehingga kerusakan dapat di identifikasi lebih cepat, dan meminimalisir tingkat gagal panen.
     """)
 
+    # Path gambar ilustrasi
+    about_image_path = os.path.join(os.getcwd(), 'Dataset', 'det.jpg')
+
+    # Cek apakah gambar tersedia
+    if not os.path.exists(about_image_path):
+        st.error(f"Gambar tidak ditemukan: {about_image_path}")
+    else:
+        st.image(about_image_path, caption="Ilustrasi Penyakit Tanaman Jagung", use_container_width=True)
 
 # Sidebar Navigasi
 st.sidebar.title("Navigasi")
