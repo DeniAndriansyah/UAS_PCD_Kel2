@@ -46,8 +46,6 @@ def home_page():
     - Gray Leaf Spot (Penyakit bercak daun abu-abu)
     - Blight (Hawar daun)
     """)
-    # Path gambar ilustrasi
-    sample_image_path = os.path.join(os.getcwd(), 'Dataset', 'sample_imagee.jpg')
 
     # Cek apakah gambar tersedia
     if not os.path.exists(sample_image_path):
