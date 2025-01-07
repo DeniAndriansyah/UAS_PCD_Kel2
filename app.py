@@ -46,9 +46,7 @@ def home_page():
     - Gray Leaf Spot (Penyakit bercak daun abu-abu)
     - Blight (Hawar daun)
     """)
-    # Tambahkan path gambar
-    sample_image_path = r"D:/sem 7/PCD/PCD-DJ/JAGUNG/Dataset/sample_imagee.jpg"
-    st.image(sample_image_path, caption="Ilustrasi Tanaman Jagung", use_container_width=True)
+
 
 # Fungsi halaman Kamera
 def camera_page():
@@ -92,8 +90,6 @@ def about_page():
     sehingga kerusakan dapat di identifikasi lebih cepat, dan meminimalisir tingkat gagal panen.
     """)
 
-    sample_image_path = r"D:/sem 7/PCD/PCD-DJ/JAGUNG/Dataset/det.jpg"
-    st.image(sample_image_path, caption="Ilustrasi Penyakit Tanaman Jagung", use_container_width=True)
 
 # Sidebar Navigasi
 st.sidebar.title("Navigasi")
