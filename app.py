@@ -8,26 +8,41 @@ import os
 MODEL_PATH = 'JAGUNG/Dataset/model_jagung.h5'
 
 # Cek apakah model tersedia
+model = None
 if not os.path.exists(MODEL_PATH):
-    st.error(f"Model tidak ditemukan di {MODEL_PATH}")
+    st.error(f"Model tidak ditemukan di {MODEL_PATH}. Pastikan model tersedia di lokasi yang benar.")
 else:
-    model = tf.keras.models.load_model(MODEL_PATH, compile=False)
+    try:
+        model = tf.keras.models.load_model(MODEL_PATH, compile=False)
+        st.sidebar.success("Model berhasil dimuat.")
+    except Exception as e:
+        st.error(f"Gagal memuat model: {e}")
 
 # Kelas penyakit daun jagung
 CLASSES = ['Healthy', 'Common Rust', 'Gray Leaf Spot', 'Blight']
 
 # Fungsi untuk memproses gambar input
 def preprocess_image(img):
-    img = img.resize((224, 224))  # Ubah ukuran sesuai model
-    img_array = np.array(img) / 255.0  # Normalisasi gambar
-    img_array = np.expand_dims(img_array, axis=0)  # Tambahkan batch dimension
-    return img_array
+    """Memproses gambar untuk prediksi."""
+    try:
+        img = img.resize((224, 224))  # Ubah ukuran sesuai model
+        img_array = np.array(img) / 255.0  # Normalisasi gambar
+        img_array = np.expand_dims(img_array, axis=0)  # Tambahkan batch dimension
+        return img_array
+    except Exception as e:
+        st.error(f"Error saat memproses gambar: {e}")
+        return None
 
 # Fungsi untuk prediksi
 def predict_image(img_array):
-    preds = model.predict(img_array)
-    class_idx = np.argmax(preds, axis=1)
-    return CLASSES[class_idx[0]], preds[0][class_idx[0]]
+    """Melakukan prediksi pada gambar input."""
+    try:
+        preds = model.predict(img_array)
+        class_idx = np.argmax(preds, axis=1)
+        return CLASSES[class_idx[0]], preds[0][class_idx[0]]
+    except Exception as e:
+        st.error(f"Error saat memprediksi gambar: {e}")
+        return None, None
 
 # Fungsi halaman Home
 def home_page():
@@ -47,26 +62,35 @@ def home_page():
     - Blight (Hawar daun)
     """)
 
-
 # Fungsi halaman Kamera
 def camera_page():
     st.title("Deteksi Penyakit Daun Jagung Melalui Kamera")
+
+    # Validasi jika model belum dimuat
+    if model is None:
+        st.error("Model belum dimuat. Silakan pastikan model tersedia di path yang benar.")
+        return
 
     # Input kamera
     camera_input = st.camera_input("Silakan ambil gambar daun jagung menggunakan kamera di bawah ini:")
 
     if camera_input is not None:
-        # Tampilkan gambar yang diambil
-        st.image(camera_input, caption="Gambar yang Diambil", use_container_width=True)
+        try:
+            # Tampilkan gambar yang diambil
+            st.image(camera_input, caption="Gambar yang Diambil", use_container_width=True)
 
-        # Proses dan prediksi gambar
-        img = Image.open(camera_input)
-        img_array = preprocess_image(img)
+            # Proses dan prediksi gambar
+            img = Image.open(camera_input)
+            img_array = preprocess_image(img)
 
-        label, confidence = predict_image(img_array)
-        st.subheader("Hasil Prediksi:")
-        st.write(f"**Kategori:** {label}")
-        st.write(f"**Probabilitas:** {confidence:.2f}")
+            if img_array is not None:
+                label, confidence = predict_image(img_array)
+                if label and confidence is not None:
+                    st.subheader("Hasil Prediksi:")
+                    st.write(f"**Kategori:** {label}")
+                    st.write(f"**Probabilitas:** {confidence:.2f}")
+        except Exception as e:
+            st.error(f"Error saat memproses gambar: {e}")
 
 # Fungsi halaman Tentang Aplikasi
 def about_page():
@@ -86,10 +110,9 @@ def about_page():
 
     st.subheader("Tujuan Aplikasi")
     st.write("""
-    Aplikasi ini bertujuan untuk klasifikasi penyakit daun jagung ini untuk mengembangkan system yang dapat mendeteksi penyakit daun jagung dengan akurat dan efisien 
-    sehingga kerusakan dapat di identifikasi lebih cepat, dan meminimalisir tingkat gagal panen.
+    Aplikasi ini bertujuan untuk klasifikasi penyakit daun jagung ini untuk mengembangkan sistem yang dapat mendeteksi penyakit daun jagung dengan akurat dan efisien 
+    sehingga kerusakan dapat diidentifikasi lebih cepat, dan meminimalisir tingkat gagal panen.
     """)
-
 
 # Sidebar Navigasi
 st.sidebar.title("Navigasi")
