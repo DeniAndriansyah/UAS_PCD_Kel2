@@ -104,6 +104,7 @@ def about_page():
     st.write("""
     **Ketua Kelompok:**
     1. Deni Andriansyah
+    
     **Anggota Kelompok:**
     2. Afip Dwi Cahyo
     3. Melinda Purnama D  
