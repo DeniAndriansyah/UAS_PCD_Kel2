@@ -100,12 +100,13 @@ def about_page():
     Aplikasi ini bekerja dengan cara memproses gambar daun jagung yang diambil melalui kamera dan memprediksi kategori penyakitnya.
     """)
 
-    st.header("Kelompok 10")
+    st.header("Kelompok 2")
     st.write("""
+    **Ketua Kelompok:**
+    1. Deni Andriansyah
     **Anggota Kelompok:**
-    1. M Rangga Saputra 221351100
-    2. Iqbal hiyatullah	221351059
-    3. M Tegar Yusuf Habibi 
+    2. Afip Dwi Cahyo
+    3. Melinda Purnama D  
     """)
 
     st.subheader("Tujuan Aplikasi")
