@@ -4,124 +4,225 @@ import tensorflow as tf
 from PIL import Image
 import os
 
-# Path ke model
+# =====================================
+# CUSTOM CSS – Tampilan Modern
+# =====================================
+st.markdown("""
+<style>
+.main { background-color: #f5f7fa; }
+
+.title {
+    font-size: 32px;
+    font-weight: 800;
+    color: #1f2937;
+}
+
+.subtitle {
+    font-size: 16px;
+    color: #4b5563;
+    margin-bottom: 20px;
+}
+
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    margin-bottom: 25px;
+}
+
+.stButton>button {
+    background: #2563eb;
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border-radius: 12px;
+    border: none;
+}
+
+.stButton>button:hover {
+    background: #1e40af;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+
+# =====================================
+# LOAD MODEL
+# =====================================
 MODEL_PATH = 'JAGUNG/Dataset/model_jagung.h5'
 
-# Cek apakah model tersedia
 model = None
 if not os.path.exists(MODEL_PATH):
-    st.error(f"Model tidak ditemukan di {MODEL_PATH}. Pastikan model tersedia di lokasi yang benar.")
+    st.error(f"Model tidak ditemukan di {MODEL_PATH}.")
 else:
     try:
         model = tf.keras.models.load_model(MODEL_PATH, compile=False)
-        st.sidebar.success("Model berhasil dimuat.")
+        st.sidebar.success("Model berhasil dimuat ✓")
     except Exception as e:
         st.error(f"Gagal memuat model: {e}")
 
-# Kelas penyakit daun jagung
+# Kelas penyakit
 CLASSES = ['Healthy', 'Common Rust', 'Gray Leaf Spot', 'Blight']
 
-# Fungsi untuk memproses gambar input
+
+# =====================================
+# DATA PENANGANAN
+# =====================================
+TREATMENTS = {
+    "Healthy": """
+    🌱 **Tanaman Sehat**
+    - Tidak ada tindakan khusus
+    - Pertahankan perawatan yang baik
+    - Lakukan monitoring rutin
+    - Pastikan tanaman mendapat nutrisi seimbang
+    """,
+
+    "Common Rust": """
+    🔧 **Penanganan Common Rust (Karat Daun)**
+    - Gunakan fungisida: *Azoxystrobin, Mancozeb, Pyraclostrobin*
+    - Lakukan rotasi tanaman untuk memutus siklus jamur
+    - Hindari penyiraman yang mengenai daun
+    - Gunakan varietas jagung tahan karat
+    """,
+
+    "Gray Leaf Spot": """
+    🔧 **Penanganan Gray Leaf Spot**
+    - Aplikasikan fungisida: *Trifloxystrobin, Propiconazole, Mancozeb*
+    - Kurangi kelembaban dengan memperjarang tanaman
+    - Buang daun yang terinfeksi berat
+    - Lakukan pergiliran tanaman (crop rotation)
+    """,
+
+    "Blight": """
+    🔧 **Penanganan Blight (Hawar Daun)**
+    - Gunakan fungisida: *Copper fungicide, Chlorothalonil, Mancozeb*
+    - Bersihkan sisa tanaman yang terinfeksi setelah panen
+    - Tingkatkan sirkulasi udara antar tanaman
+    - Gunakan benih unggul yang tahan penyakit
+    """
+}
+
+
+# =====================================
+# IMAGE PROCESSING
+# =====================================
 def preprocess_image(img):
-    """Memproses gambar untuk prediksi."""
     try:
-        img = img.resize((224, 224))  # Ubah ukuran sesuai model
-        img_array = np.array(img) / 255.0  # Normalisasi gambar
-        img_array = np.expand_dims(img_array, axis=0)  # Tambahkan batch dimension
-        return img_array
+        img = img.resize((224, 224))
+        img_array = np.array(img) / 255.0
+        return np.expand_dims(img_array, axis=0)
     except Exception as e:
         st.error(f"Error saat memproses gambar: {e}")
         return None
 
-# Fungsi untuk prediksi
+
 def predict_image(img_array):
-    """Melakukan prediksi pada gambar input."""
     try:
         preds = model.predict(img_array)
-        class_idx = np.argmax(preds, axis=1)
-        return CLASSES[class_idx[0]], preds[0][class_idx[0]]
+        idx = np.argmax(preds, axis=1)[0]
+        return CLASSES[idx], preds[0][idx]
     except Exception as e:
         st.error(f"Error saat memprediksi gambar: {e}")
         return None, None
 
-# Fungsi halaman Home
+
+# =====================================
+# HALAMAN: HOME
+# =====================================
 def home_page():
-    st.title("Selamat Datang di Aplikasi Deteksi Penyakit Daun Jagung")
+    st.markdown("<div class='title'>Deteksi Penyakit Daun Jagung</div>", unsafe_allow_html=True)
+    st.markdown("<div class='subtitle'>Aplikasi AI untuk mendeteksi penyakit daun jagung secara otomatis</div>", unsafe_allow_html=True)
+
+    st.markdown("<div class='card'>", unsafe_allow_html=True)
+    st.subheader("📌 Cara Penggunaan")
     st.write("""
-    Aplikasi ini digunakan untuk mendeteksi penyakit pada daun jagung menggunakan gambar yang diambil melalui kamera.
-    
-    **Cara Penggunaan:**
-    1. Navigasikan ke halaman **Kamera** melalui sidebar.
-    2. Ambil gambar daun jagung menggunakan kamera.
-    3. Lihat hasil prediksi dan probabilitas.
-    
-    **Kategori Penyakit yang Didukung:**
-    - Healthy (Sehat)
-    - Common Rust (Penyakit karat)
-    - Gray Leaf Spot (Penyakit bercak daun abu-abu)
-    - Blight (Hawar daun)
+    1. Pergi ke menu **Kamera**
+    2. Ambil gambar daun jagung
+    3. Lihat hasil prediksi dan probabilitas
+    4. Ikuti **cara penanganan** yang diberikan
     """)
 
-# Fungsi halaman Kamera
-def camera_page():
-    st.title("Deteksi Penyakit Daun Jagung Melalui Kamera")
+    st.subheader("📚 Penyakit yang Didukung")
+    st.write("""
+    - **Healthy (Sehat)**
+    - **Common Rust**
+    - **Gray Leaf Spot**
+    - **Blight**
+    """)
+    st.markdown("</div>", unsafe_allow_html=True)
 
-    # Validasi jika model belum dimuat
+
+# =====================================
+# HALAMAN: KAMERA
+# =====================================
+def camera_page():
+    st.markdown("<div class='title'>Deteksi Dari Kamera</div>", unsafe_allow_html=True)
+    st.markdown("<div class='subtitle'>Ambil gambar daun jagung untuk dianalisis</div>", unsafe_allow_html=True)
+
     if model is None:
-        st.error("Model belum dimuat. Silakan pastikan model tersedia di path yang benar.")
+        st.error("Model belum dimuat!")
         return
 
-    # Input kamera
-    camera_input = st.camera_input("Silakan ambil gambar daun jagung menggunakan kamera di bawah ini:")
+    st.markdown("<div class='card'>", unsafe_allow_html=True)
+    camera_input = st.camera_input("Ambil foto daun jagung:")
 
     if camera_input is not None:
-        try:
-            # Tampilkan gambar yang diambil
-            st.image(camera_input, caption="Gambar yang Diambil", use_container_width=True)
+        st.image(camera_input, caption="Gambar yang diambil", use_container_width=True)
 
-            # Proses dan prediksi gambar
-            img = Image.open(camera_input)
-            img_array = preprocess_image(img)
+        img = Image.open(camera_input)
+        img_array = preprocess_image(img)
 
-            if img_array is not None:
-                label, confidence = predict_image(img_array)
-                if label and confidence is not None:
-                    st.subheader("Hasil Prediksi:")
-                    st.write(f"**Kategori:** {label}")
-                    st.write(f"**Probabilitas:** {confidence:.2f}")
-        except Exception as e:
-            st.error(f"Error saat memproses gambar: {e}")
+        if img_array is not None:
+            label, confidence = predict_image(img_array)
 
-# Fungsi halaman Tentang Aplikasi
+            if label:
+                st.subheader("🔍 Hasil Prediksi")
+                st.success(f"**Kategori:** {label}")
+                st.info(f"**Probabilitas:** {confidence:.2f}")
+
+                # Tampilkan penanganan
+                if label in TREATMENTS:
+                    st.markdown("### 🛠 Cara Penanganan")
+                    st.markdown(f"<div class='card'>{TREATMENTS[label]}</div>", unsafe_allow_html=True)
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+
+# =====================================
+# HALAMAN: TENTANG
+# =====================================
 def about_page():
-    st.title("Tentang Aplikasi Deteksi Penyakit Daun Jagung")
+    st.markdown("<div class='title'>Tentang Aplikasi</div>", unsafe_allow_html=True)
+
+    st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.write("""
-    **Deteksi Penyakit Daun Jagung** adalah aplikasi yang menggunakan teknologi kecerdasan buatan (AI) untuk mendeteksi penyakit pada daun jagung. 
-    Aplikasi ini bekerja dengan cara memproses gambar daun jagung yang diambil melalui kamera dan memprediksi kategori penyakitnya.
+    Aplikasi ini dibuat menggunakan Machine Learning untuk mendeteksi penyakit daun jagung.
     """)
 
-    st.header("Kelompok 2")
+    st.subheader("👥 Kelompok 2")
     st.write("""
-    **Ketua Kelompok:**
-    1. Deni Andriansyah
-    
-    **Anggota Kelompok:**
-    
-    2. Afip Dwi Cahyo
-    3. Melinda Purnama D  
+    **Ketua:**  
+    - Deni Andriansyah  
+
+    **Anggota:**  
+    - Afip Dwi Cahyo  
+    - Melinda Purnama D  
     """)
 
-    st.subheader("Tujuan Aplikasi")
+    st.subheader("🎯 Tujuan")
     st.write("""
-    Aplikasi ini bertujuan untuk klasifikasi penyakit daun jagung ini untuk mengembangkan sistem yang dapat mendeteksi penyakit daun jagung dengan akurat dan efisien 
-    sehingga kerusakan dapat diidentifikasi lebih cepat, dan meminimalisir tingkat gagal panen.
+    Mendeteksi penyakit daun jagung secara cepat dan akurat untuk membantu petani mengurangi risiko gagal panen.
     """)
+    st.markdown("</div>", unsafe_allow_html=True)
 
-# Sidebar Navigasi
-st.sidebar.title("Navigasi")
+
+# =====================================
+# SIDEBAR NAVIGASI
+# =====================================
+st.sidebar.title("📌 Navigasi")
 page = st.sidebar.radio("Pilih Halaman:", ["Home", "Kamera", "Tentang Aplikasi"])
 
-# Render halaman sesuai pilihan
 if page == "Home":
     home_page()
 elif page == "Kamera":
