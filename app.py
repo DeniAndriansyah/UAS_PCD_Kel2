@@ -17,7 +17,7 @@ st.set_page_config(
 # =======================
 #  LOAD MODEL
 # =======================
-model_path = "model.h5"
+model_path = "model_jagung.h5"
 
 if not os.path.exists(model_path):
     st.error("❌ model.h5 tidak ditemukan! Pastikan file berada 1 folder dengan app.py")
